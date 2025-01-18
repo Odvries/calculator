@@ -1,10 +1,12 @@
 const dContainer = document.querySelector("#maincontainer");
+dContainer.addEventListener("onkeydown", function(e){alert(e.key)});
 const BUTTONS = ["0","",
                  "AC","()","%","/",
                  "7","8","9","X",
                  "4","5","6","-",
                  "1","2","3","+",
                  "0",",","<-","="];
+const errorAllowed = ["AC","7","8","9","4","5","6","1","2","3","0","<-","="];
 
 
 
@@ -60,30 +62,56 @@ function clearVariables() {
 
 function perform(action) {
     const dScreen = document.querySelector("#text0");
+    if (dScreen.text === "Error") 
+        {if (!errorAllowed.includes(BUTTONS[action])) return;
+         dScreen.text = "";
+         if (action === 20 || action === 21) action = 2;
+        }
     switch (action) {
+        case 0:
+            // topline 1
+            break;
+        case 1:
+            // topline 2
+            break;            
         case 2:
+            // AC - clear
             dScreen.text = BUTTONS[0];
             clearVariables();
             break;
-        case 3:
+        case 3: 
+            // () brackets
             if (operator === "") 
                 operator = "("
             else if (operator === "(") operator = ")";
             break;
         case 4:
+            // %
         case 5:
+            // / division
         case 9:
+            // x multiplication
         case 13:
+            // - subtract
         case 17:
-            if (operator === "") {
-                operator = BUTTONS[action];
-                operand1=Number(dScreen.text);
-                dScreen.text = dScreen.text + operator;
+            // + add
+            if (operator != "") {
+                operand2 = dScreen.text.substring(dScreen.text.indexOf(operator) + 1);
+                if (operand2 != "") {
+                    operand2 = Number(operand2);
+                    operate();
+                } 
+                else {
+                    break;
+                }             
             }
+            operator = BUTTONS[action];
+            operand1=Number(dScreen.text);
+            dScreen.text = dScreen.text + operator;
             break;            
         case 19:
         case 20:
-            console.log(action);
+            dScreen.text = dScreen.text.length > 1 ? dScreen.text.substr(0,dScreen.text.length - 1): "0";
             break;
         case 21:     
             if (operator !="") {
@@ -114,12 +142,14 @@ function operate() {
             calcResult = operand1 * operand2;
             break;                
         case "/":
-            calcResult = operand1 / operand2;
+            if (operand2 === 0) calcResult = "Error"
+            else
+               calcResult = operand1 / operand2;
             break;
         }
     dScreen.text = calcResult;
     clearVariables();
-    operand1 = calcResult;
+    if (calcResult != "Error") operand1 = calcResult;
 }
 
 createGrid();
