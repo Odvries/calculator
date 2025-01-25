@@ -1,14 +1,29 @@
 const dContainer = document.querySelector("#maincontainer");
-dContainer.addEventListener("onkeydown", function(e){alert(e.key)});
 const BUTTONS = ["0","",
                  "AC","()","%","/",
                  "7","8","9","X",
                  "4","5","6","-",
                  "1","2","3","+",
                  "0",",","<-","="];
-const errorAllowed = ["AC","7","8","9","4","5","6","1","2","3","0","<-","="];
 
 
+function parseKey(event) {
+    const keyMap = [
+        {key:"Enter", order: 21},
+        {key:"*", order: 9},
+        {key:"(", order: 3},
+        {key:")", order: 3},
+        {key:"Backspace", order: 20}
+    ]
+    const mappedKey = keyMap.find(keyStroke => event.key === keyStroke.key);
+    if (mappedKey) perform(mappedKey.order);
+    else {
+        const buttonOrder = BUTTONS.indexOf(event.key,2)
+        if (buttonOrder !=-1) perform(buttonOrder);
+    }
+}
+
+window.addEventListener("keyup", parseKey);
 
 let operand1 = 0;
 let operator = "";
@@ -31,6 +46,7 @@ function addDiv(parentElement,divXSize,divYSize,buttonOrder) {
         newDiv.addEventListener("click", function(){
             perform(buttonOrder);
         });
+        
     }
 
     const newText = document.createElement("a");
@@ -62,6 +78,7 @@ function clearVariables() {
 
 function perform(action) {
     const dScreen = document.querySelector("#text0");
+    const errorAllowed = ["AC","7","8","9","4","5","6","1","2","3","0","<-","="];
     if (dScreen.text === "Error") 
         {if (!errorAllowed.includes(BUTTONS[action])) return;
          dScreen.text = "";
@@ -110,6 +127,14 @@ function perform(action) {
             dScreen.text = dScreen.text + operator;
             break;            
         case 19:
+            if (operator !="") {
+               const tempOperand = dScreen.text.substring(dScreen.text.indexOf(operator) + 1);
+               if (tempOperand.indexOf(".") === -1) dScreen.text = dScreen.text + ".";
+            }
+            else {
+                if (dScreen.text.indexOf(".") === -1) dScreen.text = dScreen.text + ".";
+            }
+            break;
         case 20:
             dScreen.text = dScreen.text.length > 1 ? dScreen.text.substr(0,dScreen.text.length - 1): "0";
             break;
