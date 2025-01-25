@@ -13,6 +13,7 @@ function parseKey(event) {
         {key:"*", order: 9},
         {key:"(", order: 3},
         {key:")", order: 3},
+        {key:"c", order: 2},
         {key:"Backspace", order: 20}
     ]
     const mappedKey = keyMap.find(keyStroke => event.key === keyStroke.key);
@@ -28,6 +29,7 @@ window.addEventListener("keyup", parseKey);
 let operand1 = 0;
 let operator = "";
 let operand2 = 0;
+let calculationDone = false;
      
 function addDiv(parentElement,divXSize,divYSize,buttonOrder) {
     const newDiv = document.createElement("div");
@@ -125,8 +127,14 @@ function perform(action) {
             operator = BUTTONS[action];
             operand1=Number(dScreen.text);
             dScreen.text = dScreen.text + operator;
+            calculationDone = false;
             break;            
         case 19:
+            if (calculationDone) {
+                clearVariables();
+                dScreen.text = "";
+                calculationDone = false;
+            }
             if (operator !="") {
                const tempOperand = dScreen.text.substring(dScreen.text.indexOf(operator) + 1);
                if (tempOperand.indexOf(".") === -1) dScreen.text = dScreen.text + ".";
@@ -136,10 +144,10 @@ function perform(action) {
             }
             break;
         case 20:
-            dScreen.text = dScreen.text.length > 1 ? dScreen.text.substr(0,dScreen.text.length - 1): "0";
+            if (!calculationDone) dScreen.text = dScreen.text.length > 1 ? dScreen.text.substr(0,dScreen.text.length - 1): "0";
             break;
         case 21:     
-            if (operator !="") {
+            if (!calculationDone && operator !="") {
                 operand2 = dScreen.text.substring(dScreen.text.indexOf(operator) + 1);
                 if (operand2 != "") {
                     operand2 = Number(operand2);
@@ -148,6 +156,11 @@ function perform(action) {
             }    
             break;
         default:
+            if (calculationDone) {
+                clearVariables();
+                dScreen.text = "";
+                calculationDone = false;
+            }            
             dScreen.text = dScreen.text===BUTTONS[0]? BUTTONS[action]:(dScreen.text + BUTTONS[action]);
     }
 }
@@ -172,9 +185,11 @@ function operate() {
                calcResult = operand1 / operand2;
             break;
         }
-    dScreen.text = calcResult;
+
     clearVariables();
+    dScreen.text = calcResult;    
     if (calcResult != "Error") operand1 = calcResult;
+    calculationDone = true;
 }
 
 createGrid();
